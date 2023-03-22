@@ -1,5 +1,6 @@
 const User = require("../models/user")
 const bcyrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const signin = async(req, res) => {
 
@@ -18,7 +19,9 @@ const signin = async(req, res) => {
 
         if (isCorrectPassword) {
 
-            return res.status(200).send({ success: true, user })
+            let token = jwt.sign({ id: user._id, role: user.role }, process.env.SECRET, { expiresIn: "1h" })
+
+            return res.status(200).send({ success: true, user, token })
 
         } else {
 
@@ -58,4 +61,22 @@ const register = async(req, res) => {
 }
 
 
-module.exports = { signin, register }
+
+const getUsers = async(req, res) => {
+
+    try {
+
+        const users = await User.find()
+        res.status(200).send({ success: true, users })
+
+    } catch (err) {
+
+        res.status(404).send({ success: false, err })
+
+    }
+
+
+
+}
+
+module.exports = { signin, register, getUsers }
